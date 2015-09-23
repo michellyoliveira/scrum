@@ -349,7 +349,7 @@ if (!(empty($username) OR empty($password))) {
     <?php
     //include_once "footer.php";
 } else {
-    echo "usuario não cadastrado, faça seu cadastro";
+    echo "Usuário não cadastrado, faça seu cadastro";
     echo "<a href= 'index.html'> Voltar </a>";
 }
 ?>

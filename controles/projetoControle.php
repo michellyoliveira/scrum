@@ -46,7 +46,7 @@ function listaProjetosFacoParte($idUsuario){
     $result = mysqli_query($conn,$query);
     $numlinha = mysqli_num_rows($result);
 if ($numlinha == FALSE) {
-        echo 'Você nã está associado a nenhum projeto';
+        echo 'Você não está associado a nenhum projeto.';
     } else {
    if ($numlinha > 0) {   
         while ($row = mysqli_fetch_assoc($result)) {
@@ -55,7 +55,7 @@ if ($numlinha == FALSE) {
         return $projeto;
     } else {
         
-        echo "Voce não faz parte de nenhum projeto. ";
+        echo "Você não faz parte de nenhum projeto. ";
         return FALSE;
     }
     $libera = mysqli_free_result($result);
@@ -149,7 +149,7 @@ function detalheProjeto($idProjeto, $idPapel, $idUsuario) {
     } else {
         ?>
         <script>
-            window.alert("Voce não tem nenhum projeto cadastrado. ");
+            window.alert("Você não tem nenhum projeto cadastrado. ");
         </script>
         <?php
 
@@ -241,7 +241,7 @@ function modalEditarProjeto($idProjeto){
      } else {
         ?>
         <script>
-            window.alert("Voce não tem nenhum projeto cadastrado. ");
+            window.alert("Você não tem nenhum projeto cadastrado. ");
         </script>
         <?php
     }
@@ -262,7 +262,7 @@ function selecionaIdCriador($username){
         return $idCriador;
     }
     else{
-        echo "Usuario não encontrado";
+        echo "Usuário não encontrado.";
     }
     $libera = mysqli_free_result($result);
 }
@@ -274,7 +274,7 @@ function apagarProjeto($idProjeto,$idPapel){
     // Executa consulta
     $result = mysqli_query($conn, $query);
     if ($result === false) {
-        echo "Não foi possível apagar os dados" . mysql_error() . "<br />";
+        echo "Não foi possível apagar os dados." . mysql_error() . "<br />";
         
     } else {
         //echo "dados apagados com sucesso!";
