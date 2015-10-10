@@ -7,15 +7,15 @@ if (isset($_SESSION['idUsuario']))
     $idUsuario = $_SESSION['idUsuario'];
 if (isset($_SESSION['idPapel']))
     $idPapel = $_SESSION['idPapel'];
-echo 'id_usuario->' . $idUsuario;
-echo 'id_papel=' . $idPapel;
-echo 'username = ' . $username;
 if (isset($_SESSION['password']))
     $password = $_SESSION['password'];
 if (!(empty($username) OR empty($password))) {
     include_once "controles/config.php";
     require "controles/projetoControle.php";
     include_once 'controles/usuarioControle.php';
+    echo 'id_usuario->' . $idUsuario;
+echo 'id_papel=' . $idPapel;
+echo 'username = ' . $username;
     ?>
     <div class="row" id="linha">
         <div class="col-md-6">
@@ -119,7 +119,7 @@ if (!(empty($username) OR empty($password))) {
                         <div class="col-md-12">
                             <?php
                             $projetoFacoParte = listaProjetosFacoParte($idUsuario);
-                            if (is_array($projeto) || is_object($projeto)) {
+                            if (is_array($projetoFacoParte) || is_object($projetoFacoParte)) {
                                 foreach ($projetoFacoParte as $p => $p_value) {
                                     ?>
                                     <div class="row">
@@ -224,7 +224,7 @@ if (!(empty($username) OR empty($password))) {
                                 </div>
                                 <input type="hidden" name="idPapel" value="1" /> 
                                 <div class="form-group col-md-2">
-                                    <button type="submit" class="btn btn-primary" id="autorizar">Modificar</button>
+                                    <button type="submit" class="btn btn-primary" id="autorizar">Remover</button>
                                 </div>
                             </form>
                         </div>

@@ -5,11 +5,6 @@ if (isset($_SESSION['username']))
     $username = $_SESSION['username'];
 if (isset($_SESSION['idUsuario']))
     $idUsuario = $_SESSION['idUsuario'];
-if (isset($_SESSION['idPapel']))
-    $idPapel = $_SESSION['idPapel'];
-echo 'id_usuario->' . $idUsuario;
-echo 'id_papel=' . $idPapel;
-echo 'username = ' . $username;
 if (isset($_SESSION['password']))
     $password = $_SESSION['password'];
 if (!(empty($username) OR empty($password))) {
@@ -19,14 +14,30 @@ if (!(empty($username) OR empty($password))) {
     include "controles/faseControle.php";
     include "controles/timeControle.php";
     $idProjeto = $_REQUEST['idProjeto'];
+    $_SESSION['idProjeto'] = $idProjeto;
     echo "idProjeto = " . $idProjeto;
+    
+    $idPapelProjeto = verificaIdPapelPapelProjeto($idProjeto);
+    if($idPapelProjeto == 9){
+        $idPapel = $idPapelProjeto;
+    }
+    elseif($idPapelProjeto == 10){
+        $idPapel = $idPapelProjeto;
+    }
+    else{
+        if (isset($_SESSION['idPapel']))
+            $idPapel = $_SESSION['idPapel'];
+    }
+    echo 'id_usuario-> ' . $idUsuario;
+        echo 'id_papel = ' . $idPapel;
+        echo 'username = ' . $username;
     ?>
     <div class="row">
         <!--///////////////////////////Fases////////////////////////////////////////-->
         <div class="col-md-4">
             <h2>Fases</h2>
             <!-- Button trigger modal -->
-            <button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#myModalFase">
+            <button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#myModalFase" id="criarfase">
                 Adicionar
             </button>
 
@@ -78,8 +89,9 @@ if (!(empty($username) OR empty($password))) {
             <?php
             $fase = listaFases($idProjeto);
             if (is_array($fase) || is_object($fase)) {
-                //$i = 0;
+                $i = 0; //garante a troca de fase para edicao no foreach
                 foreach ($fase as $f => $f_value) {
+                    $i++;
                     ?>
                     <div class="row">
                         <form id="formListaFase" class="form-horizontal" role="form" action="kanban.php" method="post">
@@ -90,18 +102,16 @@ if (!(empty($username) OR empty($password))) {
                                 <label class="col-md-3 control-label ">
                                     <button type="submit" class="btn btn-info pull-left" >Detalhes</button>
                                 </label>
-                                <label class="col-md-3 control-label ">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalEditarFase">
+                                <label class="col-md-3 control-label " id="editarFase">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalEditarFase<?php echo $i ?>" >
                                         Modificar
-                                    </button>                    
+                                    </button>  
                                 </label>
-
                             </div><!-- dadosFaseForm -->
-
-                        </form>     
+                        </form>  
                     </div><!-- row -->
                     <?php
-                    modalEditarFase($f_value['id_fase']);
+                    modalEditarFase($f_value['id_fase'], $i);
                 }
             }
             ?>	
@@ -111,7 +121,7 @@ if (!(empty($username) OR empty($password))) {
             <h2>Time</h2>
             <!--            ////////////////  Modal Time /////////////////////////////////
                          Button trigger modal -->
-            <button type="button" class="btn btn-success  pull-right" data-toggle="modal" data-target="#myModal">
+            <button type="button" class="btn btn-success  pull-right" data-toggle="modal" data-target="#myModal" id="criarTime">
                 Criar / Editar
             </button>
             <hr> 
@@ -128,67 +138,75 @@ if (!(empty($username) OR empty($password))) {
 
                                 <div class="col-md-12">
                                     <div class="row">
-                                    <div class="col-md-6">
-                                        <form id="banco" action="controles/aprovaTime.php" method="post">    
-                                            <div class="form-group">
-                                                <label for="inputPapel" class="col-md-2 control-label"><h4>Banco</h4></label>
-                                                <div class="col-md-12" required="required">
-                                                    <?php bancoSelect("idUsuario[]", "banco", $idProjeto) ?>
+                                        <div class="col-md-6">
+                                            <form id="banco" action="controles/aprovaTime.php" method="post">    
+                                                <div class="form-group">
+                                                    <label for="inputPapel" class="col-md-2 control-label"><h4>Banco</h4></label>
+                                                    <div class="col-md-12" required="required">
+                                                        <?php bancoSelect("idUsuario[]", "banco", $idProjeto) ?>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <input type="hidden" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
+                                                <input type="hidden" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
                                                 <input type="hidden" name="idPapel" value="10" />  
-                                            <div class="form-group col-md-2">
-                                                <button type="submit" class="btn btn-primary" id="autorizar">Escalar</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <form id="time" action="controles/removeIntegrante.php" method="post">    
-                                            <div class="form-group">
-                                                <label for="inputPapel" class="col-md-2 control-label"><h4>Time</h4></label>
-                                                <div class="col-md-12" required="required">
-                                                    <?php timeSelect("idUsuario[]", "time", $idProjeto) ?>
+                                                <div class="form-group col-md-2">
+                                                    <button type="submit" class="btn btn-primary" id="autorizar">Escalar</button>
                                                 </div>
-                                            </div>
-                                            <input type="hidden" name="idPapel" value="4" />  
-                                            <div class="form-group col-md-2">
-                                                <button type="submit" class="btn btn-primary" id="autorizar">Remover</button>
-                                            </div>
-                                        </form>
+                                            </form>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <form id="time" action="controles/removeIntegrante.php" method="post">    
+                                                <div class="form-group">
+                                                    <label for="inputPapel" class="col-md-2 control-label"><h4>Time</h4></label>
+                                                    <div class="col-md-12" required="required">
+                                                        <?php timeSelect("idUsuario[]", "time", $idProjeto) ?>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
+                                                <input type="hidden" name="idPapel" value="4" />  
+                                                <div class="form-group col-md-2">
+                                                    <button type="submit" class="btn btn-primary" id="autorizar">Remover</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
-                                    </div>
-                                    
+
                                     <div class="row">
                                         <hr>
-                                    <div class="col-md-6">
-                                        <form id="time" action="controles/aprovaTime.php" method="post">    
-                                            <div class="form-group">
-                                                <label for="inputPapel" class="col-md-2 control-label"><h4>Time</h4></label>
-                                                <div class="col-md-12" required="required">
-                                                    <?php  //liderSelect("idUsuario", "lider", $idProjeto) ?>
+                                        <div class="col-md-6">
+                                            <form id="liderTime" action="controles/aprovaTime.php" method="post">    
+                                                <div class="form-group">
+                                                    <label for="inputPapel" class="col-md-2 control-label"><h4>Time</h4></label>
+                                                    <div class="col-md-12" required="required">
+                                                        <?php liderSelect("idUsuario", "liderTime", $idProjeto) ?>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <input type="hidden" name="idPapel" value="4" />  
-                                            <div class="form-group col-md-2">
-                                                <button type="submit" class="btn btn-primary" id="autorizar">Escolher</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <form id="time" action="controles/removeLider.php" method="post">    
-                                            <div class="form-group">
-                                                <label for="inputPapel" class="col-md-2 control-label"><h4>Lider</h4></label>
-                                                <div class="col-md-12" required="required">
-                                                    <?php // removeLider("idUsuario[]", "lider", $idProjeto) ?>
+                                                <input type="hidden" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
+                                                <input type="hidden" name="idPapel" value="2" />  
+                                                <div class="form-group col-md-2">
+                                                    <button type="submit" class="btn btn-primary" id="autorizar">Escolher</button>
                                                 </div>
-                                            </div>
-                                            <input type="hidden" name="idPapel" value="4" />  
-                                            <div class="form-group col-md-2">
-                                                <button type="submit" class="btn btn-primary" id="autorizar">Remover</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <form id="liderRemove" action="controles/removeLider.php" method="post">    
+                                                <div class="form-group">
+                                                    <label for="inputPapel" class="col-md-2 control-label"><h4>Lider</h4></label>
+                                                    <div class="col-md-12" required="required">
+                                                        <?php
+                                                        $lider = verLider($idProjeto);
+                                                        if (is_array($lider) || is_object($lider)) {
+                                                            echo '<input type="hidden" name="idUsuario" value= "' . $lider['id_usuario'] . '">';
+                                                            echo $lider['username'] . '<br><br>';
+                                                        }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
+                                                <div class="form-group col-md-2">
+                                                    <button type="submit" class="btn btn-primary" id="autorizar">Remover</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div><!-- row-->
                                 </div> <!--/col-md12 -->
 
@@ -198,29 +216,53 @@ if (!(empty($username) OR empty($password))) {
                 </div>
             </div><!--
             //////////////// Fim Modal  /////////////////////////////////-->  
-            <?php
-            $time = listaTime($idProjeto);
-            if (is_array($time) || is_object($time)) {
-                
-                foreach ($time as $t => $t_value) {
-                    $t_value['id_usuario'];
-                    echo $t_value['username'] . '<br>';
+            <div>
+                <?php
+                $time = listaTime($idProjeto);
+                if (is_array($time) || is_object($time)) {
+
+                    foreach ($time as $t => $t_value) {
+                        //$t_value['id_usuario'];
+                        if ($t_value['lider'] == 1) {
+                            echo $t_value['username'] . ' &nbsp;&nbsp; -&nbsp;&nbsp; L&iacute;der <br>';
+                        } else {
+                            echo $t_value['username'] . '<br>';
+                        }
+                    }
                 }
-            }
-            ?>
+                ?>
+            </div>
+        </div>
             <!--////////////////////////Dados Projeto//////////////////////////////////-->
-            <!--        <div class="col-md-4">
-                        <h2>Dados do Projeto</h2>
-                         Button trigger modal 
-                        <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModalEditarProjeto">
-                            Modificar
-                        </button>
-            <?php // modalEditarProjeto($idProjeto);   ?>
-                        <hr>
-            <?php
-//            detalheProjeto($idProjeto, $idPapel, $idUsuario);
-            ?>
-                        <hr>
+            <div class="col-md-4">
+                <div class="row">
+                <h2>Dados do Projeto</h2>
+                
+                <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModalEditarProjeto" id="editarProjeto">
+                    Modificar
+                </button>
+                 <hr>
+               <?php
+                    modalEditarProjeto($idProjeto); 
+                
+                    $projeto = detalheProjeto($idProjeto);
+                    if (is_array($projeto) || is_object($projeto)) {
+
+                    foreach ($projeto as $p => $p_value) {
+
+                            echo '<h4> Nome: ' . $p_value['nome'] . '</h4>';
+                            echo 'Criador: '.$p_value['username'] . '<br>';
+                            echo 'Descrição: '.$p_value['descricao'] . '<br>';
+                            echo 'Inicio: '.$p_value['inicio'] . '<br>';
+                      
+                            echo 'Fim: ' .$p_value['fim'] . '<br>';
+                          //      echo 'Inicio: '.date('d/m/Y', $p_value['inicio']) . '<br>';
+                    }
+                }
+                ?>
+                </div>
+                <!--        <hr>
+                <dic class="row">
                         //////////////////////// Reunioes //////////////////////////////////
                         <h2>Reuniões</h2>
                          Button trigger modal 
@@ -261,7 +303,7 @@ if (!(empty($username) OR empty($password))) {
                                                         <input type="date" class="form-control" name="fim" placeholder="dd/mm/yyyy" id="dfimReu" required="required" >
                                                     </div>
                                                 </div>
-                                                <input type="hidden" id="idProjeto" name="idProjeto" value="<?php // echo $idProjeto;   ?>" />     
+                                                <input type="hidden" id="idProjeto" name="idProjeto" value="<?php // echo $idProjeto;      ?>" />     
                                         </div>  row
                                     </div>
                                     <div class="modal-footer">
@@ -274,13 +316,71 @@ if (!(empty($username) OR empty($password))) {
                         </div> fade 
                         <hr>
                         <p>Nenhuma reunião cadastrada.</p>
-                        <p><a class="btn btn-primary" href="#" role="button">View details</a></p>
-                    </div> /col-lg-4 
-                </div> /row -->
+                        <p><a class="btn btn-primary" href="#" role="button">View details</a></p>-->
+            </div> <!--/col-lg-4 -->
+        </div> <!--/row  -->
             <!--<div id="conteudo-ajax"></div>-->
             <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
             <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
+<script>
+        $(document).ready(function () {
+            var idPapel = <?php echo $idPapel; ?>;
+            //alert(idPapel);
+            switch (idPapel) {
+                case 1:
+                case 2:
+                    $("#criarfase").hide();
+                    $("#editarFase").hide();
+                    $("#editarProjeto").hide();
+                    $("#criarTime").hide();
+                    //$("input[name='botao_apagar']").hide();
+                    //$("#projetosPertenco").show();
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    $("#criarfase").hide();
+                    $("#editarProjeto").hide();
+                    $("#editarFase").hide();
+                    $("#criarTime").hide();
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    $("#linha").hide();
+                    $("#criarfase").hide();
+                    $("#editarFase").hide();
+                    $("#editarProjeto").hide();
+                    $("#criarTime").hide();
+                    alert("Você não tem permissão para estar aqui");
+                case 9:
+                    break;
+                case 10:
+                    $("#criarfase").hide();
+                    $("#editarFase").hide();
+                    $("#editarProjeto").hide();
+                    $("#criarTime").hide();
+                    break;
+                default:
+                    // $("#linha").hide();
 
+            }
+
+            $("#dini, #dfim").change(function () {
+                var dataInicial = ($("#dini").val()).split("-");
+                var dataFinal = ($("#dfim").val()).split("-");
+                var dataInicialInformada = new Date(dataInicial[2], dataInicial[1] - 1, dataInicial[0]);
+                var dataFinalInformada = new Date(dataFinal[2], dataFinal[1] - 1, dataFinal[0]);
+
+                if (dataFinalInformada === dataInicialInformada) {
+                    alert("Data Final igual a Data Inicial.");
+                }
+                if (dataFinalInformada < dataInicialInformada) {
+                    alert("Data Final menor qua a Data Inicial.");
+                }
+            });
+        });
+    </script>
             <?php
             //include_once "footer.php";
         } else {

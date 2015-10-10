@@ -22,7 +22,7 @@ if (!(empty($idUsuario) OR empty($password))) {
 	$inicio = mysqli_real_escape_string($conn, $_REQUEST["inicio"]);
 	$fim = mysqli_real_escape_string($conn, $_REQUEST["fim"]);
 
-	criarProjeto($nome, $descricao, $inicio, $fim, $idUsuario, $idPapel);	
+	criarProjeto($nome, $descricao, $inicio, $fim, $idUsuario);	
 	
 }else{
 	echo "usuario não cadastrado, faça seu cadastro";

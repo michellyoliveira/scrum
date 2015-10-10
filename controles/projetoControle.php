@@ -11,7 +11,7 @@ function listaProjetos($idUsuario) {
             LEFT JOIN papel_projeto AS pap
             ON p.id_projeto = pap.id_projeto
             WHERE pap.id_usuario = $idUsuario AND pap.id_papel = 9";
-    
+
     // Executa consulta
     $result = mysqli_query($conn, $query);
 
@@ -19,55 +19,57 @@ function listaProjetos($idUsuario) {
     if ($numlinha == FALSE) {
         echo 'Você não tem nenhum projeto cadastrado';
     } else {
-    if ($numlinha > 0) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $projeto[] = $row;  
+        if ($numlinha > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $projeto[] = $row;
+            }
+            return $projeto;
+        } else {
+
+            echo 'Você não possui nenhum projeto de dua autoria.';
+            return;
         }
-        return $projeto;
-
-    } else {
-
-        echo 'Você não possui nenhum projeto de dua autoria.';
-        return;
+        $libera = mysqli_free_result($result);
     }
-    $libera = mysqli_free_result($result);
 }
-}
-function listaProjetosFacoParte($idUsuario){
+
+function listaProjetosFacoParte($idUsuario) {
     include 'config.php';
-   
-  $query = " SELECT p.id_projeto, p.nome
+
+    $query = " SELECT p.id_projeto, p.nome
             FROM projeto AS p
             LEFT JOIN papel_projeto AS pap
             ON pap.id_projeto = p.id_projeto
             WHERE pap.id_usuario = $idUsuario AND pap.id_papel = 10 ";
-  //echo $query . '<br>';
-  
-    $result = mysqli_query($conn,$query);
+    //echo $query . '<br>';
+
+    $result = mysqli_query($conn, $query);
     $numlinha = mysqli_num_rows($result);
-if ($numlinha == FALSE) {
+    if ($numlinha == FALSE) {
         echo 'Você não está associado a nenhum projeto.';
     } else {
-   if ($numlinha > 0) {   
-        while ($row = mysqli_fetch_assoc($result)) {
-            $projeto[] = $row; 
+        if ($numlinha > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $projeto[] = $row;
+            }
+            return $projeto;
         }
-        return $projeto;
-    } else {
-        
-        echo "Você não faz parte de nenhum projeto. ";
-        return FALSE;
+//        else {
+//
+//            echo "Voce não faz parte de nenhum projeto. ";
+//            return FALSE;
+//        }
+        $libera = mysqli_free_result($result);
     }
-    $libera = mysqli_free_result($result);
 }
-}
+
 function criarProjeto($nome, $descricao, $inicio, $fim, $idUsuario) {
     include "config.php";
 
     $insere = "INSERT INTO projeto (nome, descricao, inicio, fim) VALUES ('$nome','$descricao','$inicio','$fim')";
     // Executa consulta
-    $result = mysqli_query($conn, $insere); 
-    
+    $result = mysqli_query($conn, $insere);
+
     $idProjeto = mysqli_insert_id($conn);
     // Mensagem caso a consulta falhe.
     if ($result === false) {
@@ -83,12 +85,12 @@ function criarProjeto($nome, $descricao, $inicio, $fim, $idUsuario) {
 }
 
 function relacionaProjetoUsuarioPapel($idUsuario, $idPapel, $idProjeto) {
-    include "config.php"; 
-    
+    include "config.php";
+
     $insere = "INSERT INTO papel_projeto (id_usuario, id_papel, id_projeto) VALUES ('$idUsuario','$idPapel','$idProjeto')";
-    
-    $result = mysqli_query($conn, $insere); 
-    
+
+    $result = mysqli_query($conn, $insere);
+
     if ($result === false) {
         echo "Não foi possível inserir os dados" . mysqli_error() . "<br />";
     } else {
@@ -99,98 +101,64 @@ function relacionaProjetoUsuarioPapel($idUsuario, $idPapel, $idProjeto) {
     $libera = mysqli_free_result($result);
 }
 
-function detalheProjeto($idProjeto, $idPapel, $idUsuario) {
-    include "config.php";
-    
-    echo $idProjeto;
-    echo 'chegeui na funcao';
-    exit;
-    $query = "SELECT * FROM projeto As p 
-            INNER JOIN papel_projeto AS pap ON pap.id_usuario = $idUsuario AND pap.id_papel = $idPapel AND pap.id_projeto = $idProjeto "
-            . "INNER JOIN usuario as u  ON u.id_usuario = $idUsuario "
-            . "WHERE  p.id_projeto = $idProjeto";
-       echo $query;//
-       exit;
-    $busca = "SELECT DATE_FORMAT(inicio,'%d/%m/%Y') AS inicio, DATE_FORMAT(fim,'%d/%m/%Y') AS fim "
-            . "FROM projeto WHERE id_projeto = $idProjeto";
-    
-   // Executa consulta
-    $resultData = mysqli_query($conn,$busca);
-    $result = mysqli_query($conn,$query);
-    
-    $numlinha = mysqli_num_rows($result);
-    $numlinhaData = mysqli_num_rows($resultData);
-    if ($numlinha == FALSE) {
-        echo 'Você não tem dados cadastrados';
-    } else {
-    if ($numlinha >= 1 && $numlinhaData >0) {
-        while ($row = mysqli_fetch_assoc($result)) {  
-            $row2 = mysqli_fetch_assoc($resultData);
-            echo '<div class="row">
-                    <div class="col-md-12">
-                    <h4>';
-            echo 'Nome: ' . $row['nome'] . '</h4>';
-            echo '<!--<a class="btn btn-primary pull-right" href="#" role="button">Editar</a>-->
-                    </div><!--/.col-md-12--></div><!--/row--><div class="row">
-                    <div class="col-md-12">';
-            echo 'Criador: '.$row['username'].'<br />';
-            echo 'Descrição: ' . $row['descricao'];
-            echo '</div><!--/.col-md-12--></div><!--/row--><div class="row">
-                  <div class="col-md-12">';
-           
-            echo 'Inicio: '.$row2['inicio']; //date('d/m/Y', $row['inicio']); // ;
-            echo '</div><!--/.col-md-12--></div><!--/row--><div class="row">
-		  <div class="col-md-12"> ';
-            
-            echo 'Fim: ' .$row2['fim']; //date('d/m/Y', $row['fim']);//$fim;
-            echo '</div><!--/.col-md-12-->
-		 </div><!--/row-->';
-        }
-    } else {
-        ?>
-        <script>
-            window.alert("Você não tem nenhum projeto cadastrado. ");
-        </script>
-        <?php
+function detalheProjeto($idProjeto) {
+    include 'config.php';
 
-        //echo "Voce não tem nenhum projeto cadastrado. ";
-    }
-    //}
-    $libera = mysqli_free_result($result);
+    $query = "SELECT p.nome, p.descricao, DATE_FORMAT(p.inicio,'%d/%m/%Y') AS inicio, DATE_FORMAT(p.fim,'%d/%m/%Y') AS fim, u.username, pp.id_usuario
+           FROM projeto AS p
+            LEFT JOIN papel_projeto AS pp ON pp.id_projeto = $idProjeto AND pp.id_papel = 9
+            LEFT JOIN usuario AS u ON u.id_usuario = pp.id_usuario
+            WHERE p.id_projeto = $idProjeto";
+    //echo $query;
+    $result = mysqli_query($conn, $query);
+    $numlinha = mysqli_num_rows($result);
+    if ($numlinha == FALSE) {
+        echo 'Você não tem nenhu projeto cadastrado';
+    } else {
+        if ($numlinha > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $projeto[] = $row;
+            }
+            return $projeto;
+        } else {
+            echo 'Você não tem nenhum projeto cadastrado';
+            return;
+        }
+        $libera = mysqli_free_result($result);
     }
 }
 
 function updateProjeto($idProjeto, $nome, $descricao, $inicio, $fim) {
     include "config.php";
-    $altera = "UPDATE projetos
+    $altera = "UPDATE projeto
                 SET nome='$nome', descricao='$descricao', inicio='$inicio', fim='$fim'
-                WHERE id_projeto='$idProjeto'";
+                WHERE id_projeto =$ idProjeto";
     // Executa consulta
-    $result = mysqli_query($altera, $link);
+    $result = mysqli_query($conn,$altera);
     // Mensagem caso a consulta falhe.
     if ($result === false) {
         echo "Não foi possível alterar os dados" . mysqli_error() . "<br />";
     } else {
-        echo "dados alterados com sucesso!";
-        header("Location: Projeto.php?idProjeto=$idProjeto");
+        //echo "dados alterados com sucesso!";
+        header("Location: ../projeto.php?idProjeto=$idProjeto");
     }
-    $libera = mysqli_free_result($result);
+    //$libera = mysqli_free_result($result);
 }
 
-function modalEditarProjeto($idProjeto){
+function modalEditarProjeto($idProjeto) {
     include "config.php";
 
     //$query = "SELECT id_projeto, nome, descricao , DATE_FORMAT(inicio,'%d/%m/%Y') AS inicio, DATE_FORMAT(fim,'%d/%m/%Y') AS fim FROM projetos WHERE id_projeto = '$idProjeto'";
-   $query = "SELECT * FROM projeto WHERE id_projeto = '$idProjeto'";
+    $query = "SELECT * FROM projeto WHERE id_projeto = '$idProjeto'";
 // Executa consulta
-    $result = mysqli_query($conn,$query);
+    $result = mysqli_query($conn, $query);
     $numlinha = mysqli_num_rows($result);
     if ($numlinha == FALSE) {
         echo 'Este projeto não pode ser editado';
     } else {
-    if ($numlinha > 0) {
-        $row = mysqli_fetch_assoc($result);  
-          ?>  
+        if ($numlinha > 0) {
+            $row = mysqli_fetch_assoc($result);
+            ?>  
             <!-- Modal editar dados projeto -->
             <div class="modal fade" id="myModalEditarProjeto" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -201,7 +169,7 @@ function modalEditarProjeto($idProjeto){
                         </div>
                         <div class="modal-body">
                             <div class="row">
-                                <form class="form-horizontal" role="form" action="updateProjeto.php" method="POST">
+                                <form class="form-horizontal" role="form" action="controles/updateProjeto.php" method="POST">
                                     <div class="form-group">
                                         <label for="inputNome" class="col-md-2 control-label">Nome</label>
                                         <div class="col-md-8">
@@ -235,39 +203,37 @@ function modalEditarProjeto($idProjeto){
                     </div><!-- modal content -->
                 </div><!-- modal dialog -->
             </div><!-- fade -->
-            
-          <?php         
-  
-     } else {
-        ?>
-        <script>
+
+            <?php
+        } else {
+            ?>
+            <script>
             window.alert("Você não tem nenhum projeto cadastrado. ");
-        </script>
-        <?php
-    }
-    $libera = mysqli_free_result($result);
+            </script>
+            <?php
+        }
+        $libera = mysqli_free_result($result);
     }
 }
 
-function selecionaIdCriador($username){
+function selecionaIdCriador($username) {
     include 'config.php';
     $query = "SELECT id_usuario FROM usuario WHERE username = '$username'";
-    
-    $result = mysqli_query($conn,$query);
+
+    $result = mysqli_query($conn, $query);
     $numlinha = mysqli_num_rows($result);
     if ($numlinha > 0) {
         $row = mysqli_fetch_assoc($result);
         $idCriador = $row['id_usuario'];
         //echo $idCriador;
         return $idCriador;
-    }
-    else{
+    } else {
         echo "Usuário não encontrado.";
     }
     $libera = mysqli_free_result($result);
 }
 
-function apagarProjeto($idProjeto,$idPapel){
+function apagarProjeto($idProjeto, $idPapel) {
     include 'config.php';
     //fazer tres deletes
     $query = "DELETE FROM projeto WHERE id_projeto= '$idProjeto'";
@@ -275,14 +241,27 @@ function apagarProjeto($idProjeto,$idPapel){
     $result = mysqli_query($conn, $query);
     if ($result === false) {
         echo "Não foi possível apagar os dados." . mysql_error() . "<br />";
-        
     } else {
         //echo "dados apagados com sucesso!";
         //printf("Registros Excluídos: %d\n", mysql_affected_rows());
         header("Location: ../painel.php?idProjeto=$idProjeto");
     }
-
 }
-//converter no código php
-//$data_formatada = date(‘d/m/Y H:i:s’, $row[‘mysqli_data’]);
-//Esse exemplo retorna a data no formato: DD/MM/AAAA HH:MM:SS.
+
+function verificaIdPapelPapelProjeto($idProjeto){
+    include 'config.php';
+    $query = "SELECT id_papel FROM papel_projeto WHERE id_projeto = $idProjeto";
+
+    $result = mysqli_query($conn, $query);
+    $numlinha = mysqli_num_rows($result);
+    if ($numlinha > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $idPapel = $row['id_papel'];
+        //echo $idCriador;
+        return $idPapel;
+    } else {
+        return 0;
+    }
+    $libera = mysqli_free_result($result);
+    
+}

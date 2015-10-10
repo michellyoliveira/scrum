@@ -75,65 +75,61 @@ function verificaData($idProjeto){
      return $row;
 }
 
-function modalEditarFase($idFase) {
+function modalEditarFase($idFase, $i) {
     include "config.php";
-    //$query = "SELECT id_fase, nome, descricao , DATE_FORMAT(inicio,'%d/%m/%Y') AS inicio, DATE_FORMAT(fim,'%d/%m/%Y') AS fim, id_projeto FROM fase WHERE id_fase = $idFase";
+    //$query = "SELECT id_fase, nome, descricao , DATE_FORMAT(inicio,'%d-%m-%Y') AS inicio, DATE_FORMAT(fim,'%d-%m-%Y') AS fim, id_projeto FROM fase WHERE id_fase = $idFase";
     $query = "SELECT * FROM fase WHERE id_fase = '$idFase'";
+     print_r($idFase);
     // Executa consulta
     $result = mysqli_query($conn, $query);
     $numlinha = mysqli_num_rows($result);
 
     if ($numlinha > 0) {
         $row = mysqli_fetch_assoc($result);
-        $idFase = $row['id_fase'];
-        $nome = $row['nome'];
-        $descricao = $row['descricao'];
-        $inicio = $row['inicio'];
-        $fim = $row['fim'];
-        $idProjeto = $row['id_projeto'];
+        echo $row['id_fase'];
         ?>  
         <!-- Modal editar dados fase -->
-        <div class="modal fade" id="myModalEditarFase" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal fade" id="myModalEditarFase<?php echo $i; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Editar Fase</h4> <?php echo $idFase; ?>
+                        <h4 class="modal-title" id="myModalLabel">Editar Fase</h4> <?php echo $row['id_fase']; ?>
                     </div>
+                     <form class="form-horizontal" role="form" action="controles/updateFase.php" method="POST">
                     <div class="modal-body">
-                        <div class="row">
-                            <form class="form-horizontal" role="form" action="controles/updateFase.php" method="POST">
+                        <div class="row">                           
                                 <div class="form-group">
                                     <label for="inputNome" class="col-md-2 control-label">Nome</label>
                                     <div class="col-md-8">
-                                        <input type="text" class="form-control" name="nome" id="nome" value="<?php echo $nome; ?>">
+                                        <input type="text" class="form-control" name="nome" id="nome" value="<?php echo $row['nome']; ?>">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="inputDescricao" class="col-md-2 control-label">Descrição</label>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" rows="3" name="descricao" id="texto"><?php echo $descricao; ?></textarea>
+                                        <textarea class="form-control" rows="3" name="descricao" id="texto"><?php echo $row['descricao']; ?></textarea>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="inputInicio3" class="col-sm-2 control-label">Início</label>
                                     <div class="col-sm-4">
-                                        <input type="date" class="form-control" name="inicio" placeholder="" value="<?php echo $inicio; ?>" id="dini" placeholder="<?php echo $inicio; ?>" >
+                                        <input type="date" class="form-control" name="inicio" placeholder="" value="<?php echo $row['inicio']; ?>" id="dini" placeholder="<?php echo $row['inicio']; ?>" >
                                     </div>
                                     <label for="inputFim" class="col-sm-1 control-label">Fim</label>
                                     <div class="col-sm-4">
-                                        <input type="date" class="form-control" name="fim" value ="<?php echo $fim; ?>" id="dfim">
+                                        <input type="date" class="form-control" name="fim" value ="<?php echo $row['fim']; ?>" id="dfim">
                                     </div>
                                 </div>
-                                <input type="hidden" id="idFase" name="idFase" value="<?php echo $idFase; ?>" />   
-                                <input type="hidden" id="idProjeto" name="idProjeto" value="<?php echo $idProjeto; ?>" /> 
+                                <input type="hidden" id="idFase" name="idFase" value="<?php echo $row['id_fase']; ?>" />   
+                                <input type="hidden" id="idProjeto" name="idProjeto" value="<?php echo $row['id_projeto']; ?>" /> 
                         </div> <!--row-->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-success" id="salvarFase">Salvar</button>
                         <!--<label class="col-md-3 control-label pull-right">-->
-                        <a class="btn btn-danger pull-right" href="controles/apagarFase.php?idFase=<?php echo $idFase ?>&idProjeto=<?php echo $idProjeto;  ?>" role="button" id="botaoApagar" >Apagar</a>
+                        <a class="btn btn-danger pull-right" href="controles/apagarFase.php?idFase=<?php echo $row['id_fase'] ?>&idProjeto=<?php echo $row['id_projeto'];  ?>" role="button" id="botaoApagar" >Apagar</a>
                         <!--</label>-->
                     </div>
                     </form>
@@ -165,7 +161,7 @@ function modalEditarFase($idFase) {
             window.alert("Voce não tem fase para editar ");
         </script>
         <?php
-        $libera = mysql_free_result($result);
+        //$libera = mysql_free_result($result);
     }
 }
 

@@ -17,28 +17,6 @@ function criarTime($idProjeto, $idUsuario) {
     $libera = mysqli_free_result($result);
 }
 
-//function listaUserSelect($name, $idForm) {
-//    include "config.php";
-//    $query = "SELECT * FROM usuario"; //sprintf("SELECT * FROM info")
-//    $result = mysqli_query($conn, $query);
-//    if ($result === false) {
-//        echo "Não foi possível buscar os dados" . mysql_error() . "<br />";
-//    } else {
-//        $numlinha = mysqli_num_rows($result);
-//        if ($numlinha > 0) {
-//            echo '<select name="'.$name.'" form="'.$idForm.'" >';
-//            echo ' <option value="">Selecione</option>';
-//            while ($row = mysql_fetch_assoc($result)) {
-//                echo ' <option value="'.$row['id_usuario']. '">'. $row['username'].'</option>';
-//            }
-//            echo '</select><br />';    
-//        } else {
-//            echo "nenhum usuario cadastrado";
-//        }
-//    }
-//    $libera = mysqli_free_result($result);
-//}
-
 function updateTime($idProjeto, $idUsuario) {
     include "config.php";
     $altera = "UPDATE time
@@ -58,9 +36,9 @@ function updateTime($idProjeto, $idUsuario) {
 
 function bancoSelect($name, $idForm, $idProjeto) {
     include "controles/config.php";
-    $query = "SELECT DISTINCT tabela1.id_usuario, tabela1.nome
+    $query = "SELECT DISTINCT tabela1.id_usuario, tabela1.username
     FROM 
-    (SELECT usuario.id_usuario, usuario.nome FROM papel_projeto
+    (SELECT usuario.id_usuario, usuario.username FROM papel_projeto
     RIGHT JOIN usuario ON papel_projeto.id_usuario = usuario.id_usuario
     WHERE papel_projeto.id_usuario is NULL 
     OR papel_projeto.id_projeto <> $idProjeto) AS tabela1
@@ -76,24 +54,24 @@ function bancoSelect($name, $idForm, $idProjeto) {
         echo '<select name="' . $name . '" form="' . $idForm . '"  multiple="multiple">';
         //echo ' <option value="Selecione">Selecione</option>';
         while ($row = mysqli_fetch_assoc($result)) {
-            echo ' <option value="' . $row['id_usuario'] . '">' . $row['nome'] . '</option>';
+            echo ' <option value="' . $row['id_usuario'] . '">' . $row['username'] . '</option>';
         }
-        echo '</select><br />';
+        echo '</select><br><br>';
     } else {
         echo "nenhum usuario cadastrado";
     }
-     $libera = mysqli_free_result($result);
+    //$libera = mysqli_free_result($result);
 }
 
 function timeSelect($name, $idForm, $idProjeto) {
     //echo $idProjeto;
-    
+
     include "config.php";
     $query = "SELECT u.username, u.id_usuario
             FROM usuario AS u
             LEFT JOIN papel_projeto AS pp ON pp.id_usuario = u.id_usuario
             WHERE pp.id_projeto = $idProjeto";
-    
+
     $result = mysqli_query($conn, $query);
     $linha = mysqli_num_rows($result);
     if ($linha > 0) {
@@ -102,17 +80,39 @@ function timeSelect($name, $idForm, $idProjeto) {
         while ($row = mysqli_fetch_assoc($result)) {
             echo ' <option value="' . $row['id_usuario'] . '">' . $row['username'] . '</option>';
         }
-        echo '</select><br />';
+        echo '</select><br><br>';
+    } else {
+        echo "nenhum usuario cadastrado";
+    }
+}
+
+function liderSelect($name, $idForm, $idProjeto) {
+    include "config.php";
+    $query = "SELECT u.username, u.id_usuario
+            FROM usuario AS u
+            LEFT JOIN papel_projeto AS pp ON pp.id_usuario = u.id_usuario
+            WHERE pp.id_projeto = $idProjeto";
+
+    $result = mysqli_query($conn, $query);
+    $numlinha = mysqli_num_rows($result);
+    if ($numlinha > 0) {
+        echo '<select name="' . $name . '" form="' . $idForm . '" >';
+        //echo ' <option value="Selecione">Selecione</option>';
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo ' <option value="' . $row['id_usuario'] . '">' . $row['username'] . '</option>';
+        }
+        echo '</select><br><br>';
+        //$libera = mysqli_free_result($result);
     } else {
         echo "nenhum usuario cadastrado";
     }
 }
 
 function listaTime($idProjeto) {
-    
+
     include "config.php";
     $username = array();
-    $query = "SELECT u.username, u.id_usuario
+    $query = "SELECT u.username, u.id_usuario, pp.id_papel, pp.lider
             FROM usuario AS u
             INNER JOIN papel_projeto AS pp
             WHERE pp.id_projeto = $idProjeto
@@ -129,100 +129,73 @@ function listaTime($idProjeto) {
             }
             return $time;
         } else {
-            echo 'Você não tem nenhuma fase cadastrada';
+            echo 'Você não tem nenhum time cadastrado';
             return;
         }
-        $libera = mysql_free_result($result);
+        $libera = mysqli_free_result($result);
     }
 }
 
-//function listaTime($idProjeto) {
-//    
-//    include "config.php";
-//    $username = array();
-//    $query = "SELECT u.username, u.id_usuario, pp.id_projeto
-//            FROM usuario AS u
-//            INNER JOIN papel_projeto AS pp
-//            WHERE pp.id_projeto = $idProjeto
-//            AND (u.id_usuario = pp.id_usuario)";
-//
-//    $result = mysqli_query($conn, $query);
-//    $numlinha = mysqli_num_rows($result);
-//    if ($numlinha == FALSE) {
-//        echo 'Este time ainda não tem nenhum membro';
-//    } else {
-//        if ($numlinha > 0) {
-//            while ($row = mysql_fetch_assoc($result)) {
-//                $username = $row['username'];
-//                $idProjeto = $row['id_projeto'];
-//                $idUsuario = $row['id_usuario'];
-//
-//                echo '<div class="row">	';
-//                echo '<div id="dadosForm" class="col-md-12 control-label" >';
-//                echo '<form id="formListaTime" class="form-horizontal" role="form" action="UpdateDadosTime.php" method="post"> ';
-//
-//                echo '<label for="Nome" class="col-md-6 control-label  pull-left">' . $username . '</label>';
-//
-//                echo '<input type="hidden" id="idUsuario" name="idUsuario" value="' . $idUsuario . '" /> ';
-//                echo '<input type="hidden" id="idProjeto" name="idProjeto" value="' . $idProjeto . '" /> ';
-//                echo '<label class="col-md-3 control-label"><button type="submit" class="btn btn-primary pull-left" '
-//                . 'id="mudarMembro">Modificar</button></label>';
-//                echo '<label class="col-md-3 control-label">'
-//                . '<a class="btn btn-danger" href="ApagarTime.php?idProjeto=' . $idProjeto . '" '
-//                . 'role="button" id="botaoApagar" >Remover</a></label>';
-//                echo ' 
-//                </form>
-//            </div><!-- dadosForm-->   
-//        </div><!-- row -->';
-//            }
-//            $libera = mysqli_free_result($result);
-//        } else {
-//            echo 'Este projeto ainda não tem nenhum membro';
-//        }
-//    }
-//}
-
-function verificaProjetoTemTime($idProjeto) {
+function removeIntegrante($idUsuario, $idProjeto) {
     include "config.php";
-    $query = "SELECT id_projeto FROM time WHERE id_projeto = '$idProjeto'"; //sprintf("SELECT * FROM info")
+
+    $query = "DELETE FROM papel_projeto WHERE id_projeto= $idProjeto AND id_usuario = $idUsuario";
+    // Executa consulta
     $result = mysqli_query($conn, $query);
     if ($result === false) {
-        echo "Não foi possível buscar os dados" . mysql_error() . "<br />";
+        echo "Não foi possível apagar os dados" . mysql_error() . "<br />";
     } else {
-        $numlinha = mysqli_num_rows($result);
-        if ($numlinha > 0) {
-            ?>
-            <script>
-                window.alert("Este projeto já tem time. ");
-            </script>
-            <?php
-
-            //header("Location: Projeto.php?idProjeto=$idProjeto");
-        }
-        //else {
-//            //caso não tenha nenhum time cadastrado, cria o time
-//              //criarTime($idProjeto, $idUsuario);
-//        }
+        //echo "dados apagados com sucesso!";
+        header("Location: ../projeto.php?idProjeto=$idProjeto");
     }
-    $libera = mysqli_free_result($result);
 }
 
-function listaTimeSelect($idProjeto, $name, $idForm) {
-    include "config.php";
-    $username = array();
-    $query = "SELECT usuario.username, usuario.id_usuario, time.id_projeto
-                FROM usuario
-                INNER JOIN time
-                WHERE time.id_projeto = '$idProjeto'";
-//                AND (time.integranteUm = usuario.id_usuario 
-//                     OR time.integranteDois = usuario.id_usuario 
-//                     OR time.integranteTres = usuario.id_usuario 
-//                     OR time.integranteQuatro = usuario.id_usuario)";
 
+function verLider($idProjeto) {
+    include "config.php";
+    $query = "SELECT u.username, u.id_usuario
+            FROM usuario AS u
+            LEFT JOIN papel_projeto AS pp ON pp.id_usuario = u.id_usuario
+            WHERE pp.id_projeto = $idProjeto AND pp.lider = 1";
     $result = mysqli_query($conn, $query);
     $numlinha = mysqli_num_rows($result);
 
-    if ($numlinha > 0) {
-        
+    if ($numlinha == FALSE) {
+        echo 'Time sem l&iacute;der';
+    } else {
+        if ($numlinha > 0) {
+
+            $row = mysqli_fetch_assoc($result);
+            return $row;
+        } else {
+            echo 'Você não tem l&iacute;der eleito';
+            return;
+        }
+        $libera = mysqli_free_result($result);
     }
+}
+
+function removeLider($idProjeto, $idUsuario) {
+    include "config.php";
+    $query = "UPDATE papel_projeto SET lider = 0 WHERE id_projeto = $idProjeto AND id_usuario = $idUsuario";
+    $result = mysqli_query($conn, $query);
+    if ($result === TRUE) {
+        header("Location:../projeto.php?idProjeto=$idProjeto");
+    } else {
+        echo "Error updating record: " . mysqli_error($conn);
+    }
+}
+
+function temLider($idProjeto){
+    include "config.php";
+    $query = "SELECT lider FROM papel_projeto
+        WHERE id_projeto = $idProjeto AND lider = 1";
+    $result = mysqli_query($conn, $query);
+    $row = mysqli_num_rows($result);
+    if ($row == FALSE) {
+        return 0;
+    } else {
+        return $row;
+    }
+    
 }
