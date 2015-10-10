@@ -47,8 +47,8 @@
                                 <li><a href="#">Gráficos</a></li>
                                 <li><a href="#">Chat</a></li>
                                 <li><a href="#">Configurações</a></li>
-                                <li class="divider"></li>
-                                <li><a href="logout.php" id="sair">Sair</a></li>
+<!--                                <li class="divider"></li>
+                                <li><a href="logout.php" id="sair">Sair</a></li>-->
                             </ul>
                         </li>
                         <li><a href="logout.php" id="sair">Sair</a></li>
